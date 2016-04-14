@@ -117,11 +117,16 @@ public class SelectContactsManager extends ReactContextBaseJavaModule {
     counter = null;
 
     // check if android version < 5.0
-    if ((android.os.Build.VERSION.RELEASE.startsWith("1.")) || (android.os.Build.VERSION.RELEASE.startsWith("2.")) || (android.os.Build.VERSION.RELEASE.startsWith("3.")) || (android.os.Build.VERSION.RELEASE.startsWith("4."))) {
+    if (android.os.Build.VERSION.RELEASE.startsWith("1.") 
+      || android.os.Build.VERSION.RELEASE.startsWith("2.") 
+      || android.os.Build.VERSION.RELEASE.startsWith("3.")
+    ){
+      //|| (android.os.Build.VERSION.RELEASE.startsWith("4.")))   JCK:  Seems to work fine on 4
 
       callbackFinal.invoke(null,"android version not supported");
 
-    } else {
+    } 
+    else {
 
       // start the activity to pick the contact from addressbook
       Intent pickContactIntent = new Intent( Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI );
@@ -137,17 +142,23 @@ public class SelectContactsManager extends ReactContextBaseJavaModule {
             if (foundFlag == 1) {
 
               // cancel countdown, send result
-              counter.cancel();
-              callbackFinal.invoke(null,map);
+              if (counter!=null){
+                counter.cancel();
+                counter=null;
+                callbackFinal.invoke(null,map);
+              }
             }
 
             // cancel polling if user hits back button
             if (foundFlag == 2) {
 
               // cancel countdown, send result
-              counter.cancel();
-              // send user canceled
-              callbackFinal.invoke(null,"user canceled");
+              if (counter!=null){
+                counter.cancel();
+                counter=null;
+                // send user canceled
+                callbackFinal.invoke(null,"user canceled");
+              }
 
             }
 
@@ -159,8 +170,12 @@ public class SelectContactsManager extends ReactContextBaseJavaModule {
             // poll for 45 cycles - or 45 seconds max
             if (foundFlag == 0) {
 
-              // send timed out result
-              callbackFinal.invoke(null,"timed out");
+              if (counter!=null){
+                counter.cancel();
+                counter=null;
+                // send timed out result
+                callbackFinal.invoke(null,"timed out");
+              }
 
             }
 
